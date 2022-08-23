@@ -2302,9 +2302,9 @@ var distNode$7 = {};
 
 var distNode$6 = {};
 
-var isPlainObject$5 = {};
+var isPlainObject$3 = {};
 
-Object.defineProperty(isPlainObject$5, '__esModule', { value: true });
+Object.defineProperty(isPlainObject$3, '__esModule', { value: true });
 
 /*!
  * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
@@ -2313,14 +2313,14 @@ Object.defineProperty(isPlainObject$5, '__esModule', { value: true });
  * Released under the MIT License.
  */
 
-function isObject$1(o) {
+function isObject(o) {
   return Object.prototype.toString.call(o) === '[object Object]';
 }
 
-function isPlainObject$4(o) {
+function isPlainObject$2(o) {
   var ctor,prot;
 
-  if (isObject$1(o) === false) return false;
+  if (isObject(o) === false) return false;
 
   // If has modified constructor
   ctor = o.constructor;
@@ -2328,7 +2328,7 @@ function isPlainObject$4(o) {
 
   // If has modified prototype
   prot = ctor.prototype;
-  if (isObject$1(prot) === false) return false;
+  if (isObject(prot) === false) return false;
 
   // If constructor does not have an Object-specific method
   if (prot.hasOwnProperty('isPrototypeOf') === false) {
@@ -2339,11 +2339,11 @@ function isPlainObject$4(o) {
   return true;
 }
 
-isPlainObject$5.isPlainObject = isPlainObject$4;
+isPlainObject$3.isPlainObject = isPlainObject$2;
 
 Object.defineProperty(distNode$6, '__esModule', { value: true });
 
-var isPlainObject$3 = isPlainObject$5;
+var isPlainObject$1 = isPlainObject$3;
 var universalUserAgent$3 = distNode$8;
 
 function lowercaseKeys(object) {
@@ -2360,7 +2360,7 @@ function lowercaseKeys(object) {
 function mergeDeep(defaults, options) {
   const result = Object.assign({}, defaults);
   Object.keys(options).forEach(key => {
-    if (isPlainObject$3.isPlainObject(options[key])) {
+    if (isPlainObject$1.isPlainObject(options[key])) {
       if (!(key in defaults)) Object.assign(result, {
         [key]: options[key]
       });else result[key] = mergeDeep(defaults[key], options[key]);
@@ -2728,45 +2728,6 @@ const DEFAULTS = {
 const endpoint$1 = withDefaults$2(null, DEFAULTS);
 
 distNode$6.endpoint = endpoint$1;
-
-var isPlainObject$2 = {};
-
-Object.defineProperty(isPlainObject$2, '__esModule', { value: true });
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject$1(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-isPlainObject$2.isPlainObject = isPlainObject$1;
 
 var lib$2 = {exports: {}};
 
@@ -84418,7 +84379,7 @@ function _interopDefault$1 (ex) { return (ex && (typeof ex === 'object') && 'def
 
 var endpoint = distNode$6;
 var universalUserAgent$2 = distNode$8;
-var isPlainObject = isPlainObject$2;
+var isPlainObject = isPlainObject$3;
 var nodeFetch = _interopDefault$1(lib$2.exports);
 var requestError = distNode$5;
 
