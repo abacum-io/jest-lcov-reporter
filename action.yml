@@ -22,6 +22,14 @@ inputs:
     description: Update the existing comment if it exists instead of creating a new one
     required: false
     default: false
+  show-changed-files:
+    description: Show the changed files in the comment
+    required: false
+    default: false
+  min-coverage:
+    description: Minimum coverage percentage to pass
+    required: false
+    default: 0
 runs:
   using: node16
   main: dist/main.js

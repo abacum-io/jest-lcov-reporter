@@ -121,6 +121,9 @@ async function main() {
 
 		if (existingComment) {
 			await updateGitHubComment(existingComment.id)
+			if (error) {
+				throw error;
+			}
 			return
 		}
 	}
