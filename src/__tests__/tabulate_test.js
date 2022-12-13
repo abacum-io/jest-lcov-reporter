@@ -136,7 +136,8 @@ test("tabulate should generate a correct table", function() {
 		repository: "example/foo",
 		commit: "2e15bee6fe0df5003389aa5ec894ec0fea2d874a",
 		prefix: "/files/project/",
-		files
+		files,
+		minCoverage: 70,
 	}
 
 	const html = table(
@@ -170,8 +171,8 @@ test("tabulate should generate a correct table", function() {
 			tr(td({ colspan: 4 },`<b title="src/bar">bar</b>`)),
 			tr(
 				td(
-					"&nbsp; &nbsp;",
-					"baz.js"
+					"🔴","&nbsp; &nbsp;",
+					"baz.js", "&nbsp;⬆️&nbsp;20.00%"
 				),
 				td(b("50")),
 				td(b("66.67")),

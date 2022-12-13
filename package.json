@@ -1,10 +1,10 @@
 {
 	"name": "jest-lcov-reporter",
-	"version": "0.3.1",
+	"version": "0.3.3",
 	"description": "Comments a pull request with the lcov code coverage",
 	"license": "MIT",
-	"author": "Veddha Edsa <@vebr>",
-	"repository": "https://github.com/vebr/jest-lcov-reporter",
+	"author": "Veddha Edsa <@vebr>, Aleksandr Kanunnikov <@lifeart>",
+	"repository": "https://github.com/lifeart/jest-lcov-reporter",
 	"keywords": [
 		"actions",
 		"pull-request",

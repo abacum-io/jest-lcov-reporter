@@ -4,7 +4,7 @@ import core from "@actions/core"
 // import sh from 'run-sh';
 import { getOctokit, context } from "@actions/github"
 
-import { parse } from "./lcov"
+import { parse, percentage } from "./lcov"
 import { commentIdentifier, diff } from "./comment"
 
 async function main() {
@@ -14,6 +14,9 @@ async function main() {
 	const baseFile = core.getInput("lcov-base")
 	const updateComment = core.getBooleanInput("update-comment")
 	const showChangedFiles = core.getBooleanInput("show-changed-files")
+	const rawMinCoverage = core.getInput("min-coverage");
+
+	const minCoverage = rawMinCoverage ? parseFloat(rawMinCoverage) : 0;
 
 	const raw = await fs.readFile(lcovFile, "utf-8").catch(err => null)
 	if (!raw) {
@@ -69,6 +72,7 @@ async function main() {
 		repository: context.payload.repository.full_name,
 		commit: context.payload.pull_request.head.sha,
 		prefix: `${process.env.GITHUB_WORKSPACE}/`,
+		minCoverage: minCoverage,
 		head,
 		base,
 		workflowName: process.env.GITHUB_WORKFLOW,
@@ -76,6 +80,16 @@ async function main() {
 
 	const lcov = await parse(raw)
 	const baselcov = baseRaw && (await parse(baseRaw))
+	
+	let error = null;
+
+	if (minCoverage > 0) {
+		const coverage = percentage(lcov);
+		if (coverage < minCoverage) {
+			error = new Error(`Coverage is below the minimum of ${minCoverage}%. Current coverage is ${coverage}%`);
+		}
+	}
+
 	const body = await diff(lcov, baselcov, options)
 
 	const createGitHubComment = () =>
@@ -112,6 +126,10 @@ async function main() {
 	}
 
 	await createGitHubComment()
+
+	if (error) {
+		throw error;
+	}
 }
 
 export default main().catch(function(err) {

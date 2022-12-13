@@ -86603,9 +86603,10 @@ function toFolder(path) {
 }
 
 function toRow(file, indent, options) {
-	let branches = percentage(file.branches);
-	let functions = percentage(file.functions);
-	let lines = percentage(file.lines);
+	let branches = percentage(file.branches, options.minCoverage);
+	let functions = percentage(file.functions, options.minCoverage);
+	let lines = percentage(file.lines, options.minCoverage);
+	let lineCoverage = file.lines ? numericPercentage(file.lines) : 0;
 
 	const allOk = branches === '' && functions === '' && lines === '';
 
@@ -86613,8 +86614,14 @@ function toRow(file, indent, options) {
 		return null;
 	}
 
+	let name = filename(file, indent, options);
+
+	if (lineCoverage > 0 && lineCoverage < options.minCoverage) {
+		name = `🔴${indent?'':'&nbsp;'}${name}&nbsp;⬆️&nbsp;${(options.minCoverage - lineCoverage).toFixed(2)}%`;
+	}
+
 	return tr(
-		td(filename(file, indent, options)),
+		td(name),
 		// td(branches),
 		td(lines),
 		td(functions),
@@ -86630,15 +86637,19 @@ function filename(file, indent, options) {
 	return fragment(space, last)
 }
 
-function percentage(item) {
+function numericPercentage(item) {
+	return item.found === 0 ? 100 : (item.hit / item.found) * 100;
+}
+
+function percentage(item, minCoverage = 0) {
 	if (!item) {
 		return "N/A"
 	}
 
-	const value = item.found === 0 ? 100 : (item.hit / item.found) * 100;
+	const value = numericPercentage(item);
 	const rounded = value.toFixed(2).replace(/\.0*$/, "");
 
-	const tag = value > 70 ? fragment : b;
+	const tag = value > minCoverage ? fragment : b;
 
 
 	if (rounded === '100') {
@@ -86737,6 +86748,9 @@ async function main() {
 	const baseFile = coreExports.getInput("lcov-base");
 	const updateComment = coreExports.getBooleanInput("update-comment");
 	const showChangedFiles = coreExports.getBooleanInput("show-changed-files");
+	const rawMinCoverage = coreExports.getInput("min-coverage");
+
+	const minCoverage = rawMinCoverage ? parseFloat(rawMinCoverage) : 0;
 
 	const raw = await require$$0$1.promises.readFile(lcovFile, "utf-8").catch(err => null);
 	if (!raw) {
@@ -86792,6 +86806,7 @@ async function main() {
 		repository: context.payload.repository.full_name,
 		commit: context.payload.pull_request.head.sha,
 		prefix: `${process.env.GITHUB_WORKSPACE}/`,
+		minCoverage: minCoverage,
 		head,
 		base,
 		workflowName: process.env.GITHUB_WORKFLOW,
@@ -86799,6 +86814,16 @@ async function main() {
 
 	const lcov = await parse(raw);
 	const baselcov = baseRaw && (await parse(baseRaw));
+	
+	let error = null;
+
+	if (minCoverage > 0) {
+		const coverage = percentage$1(lcov);
+		if (coverage < minCoverage) {
+			error = new Error(`Coverage is below the minimum of ${minCoverage}%. Current coverage is ${coverage}%`);
+		}
+	}
+
 	const body = await diff(lcov, baselcov, options);
 
 	const createGitHubComment = () =>
@@ -86835,6 +86860,10 @@ async function main() {
 	}
 
 	await createGitHubComment();
+
+	if (error) {
+		throw error;
+	}
 }
 
 var index = main().catch(function(err) {

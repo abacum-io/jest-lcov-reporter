@@ -84,9 +84,10 @@ function toFolder(path) {
 }
 
 function toRow(file, indent, options) {
-	let branches = percentage(file.branches);
-	let functions = percentage(file.functions);
-	let lines = percentage(file.lines);
+	let branches = percentage(file.branches, options.minCoverage);
+	let functions = percentage(file.functions, options.minCoverage);
+	let lines = percentage(file.lines, options.minCoverage);
+	let lineCoverage = file.lines ? numericPercentage(file.lines) : 0;
 
 	const allOk = branches === '' && functions === '' && lines === '';
 
@@ -94,8 +95,14 @@ function toRow(file, indent, options) {
 		return null;
 	}
 
+	let name = filename(file, indent, options);
+
+	if (lineCoverage > 0 && lineCoverage < options.minCoverage) {
+		name = `🔴${indent?'':'&nbsp;'}${name}&nbsp;⬆️&nbsp;${(options.minCoverage - lineCoverage).toFixed(2)}%`;
+	}
+
 	return tr(
-		td(filename(file, indent, options)),
+		td(name),
 		// td(branches),
 		td(lines),
 		td(functions),
@@ -111,15 +118,19 @@ function filename(file, indent, options) {
 	return fragment(space, last)
 }
 
-function percentage(item) {
+function numericPercentage(item) {
+	return item.found === 0 ? 100 : (item.hit / item.found) * 100;
+}
+
+function percentage(item, minCoverage = 0) {
 	if (!item) {
 		return "N/A"
 	}
 
-	const value = item.found === 0 ? 100 : (item.hit / item.found) * 100
+	const value = numericPercentage(item);
 	const rounded = value.toFixed(2).replace(/\.0*$/, "")
 
-	const tag = value > 70 ? fragment : b
+	const tag = value > minCoverage ? fragment : b
 
 
 	if (rounded === '100') {
