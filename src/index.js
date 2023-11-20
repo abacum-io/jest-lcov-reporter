@@ -14,18 +14,18 @@ async function main() {
 	const baseFile = core.getInput("lcov-base")
 	const updateComment = core.getBooleanInput("update-comment")
 	const showChangedFiles = core.getBooleanInput("show-changed-files")
-	const rawMinCoverage = core.getInput("min-coverage");
+	const rawMinCoverage = core.getInput("min-coverage")
 
-	const minCoverage = rawMinCoverage ? parseFloat(rawMinCoverage) : 0;
+	const minCoverage = rawMinCoverage ? parseFloat(rawMinCoverage) : 0
 
-	const raw = await fs.readFile(lcovFile, "utf-8").catch(err => null)
+	const raw = await fs.readFile(lcovFile, "utf-8").catch((err) => null)
 	if (!raw) {
 		console.log(`No coverage report found at '${lcovFile}', exiting...`)
 		return
 	}
 
 	const baseRaw =
-		baseFile && (await fs.readFile(baseFile, "utf-8").catch(err => null))
+		baseFile && (await fs.readFile(baseFile, "utf-8").catch((err) => null))
 	if (baseFile && !baseRaw) {
 		console.log(`No coverage report found at '${baseFile}', ignoring...`)
 	}
@@ -36,14 +36,12 @@ async function main() {
 		return
 	}
 
-	const head = context.payload.pull_request.head.ref;
-	const base = context.payload.pull_request.base.ref;
+	const head = context.payload.pull_request.head.ref
+	const base = context.payload.pull_request.base.ref
 
-	
-	let changed = [];
+	let changed = []
 
-	const githubClient = getOctokit(token);
-
+	const githubClient = getOctokit(token)
 
 	if (showChangedFiles) {
 		// Use GitHub's compare two commits API.
@@ -53,18 +51,17 @@ async function main() {
 			base,
 			head,
 			owner: context.repo.owner,
-			repo: context.repo.repo
-		});
+			repo: context.repo.repo,
+		})
 
 		if (response.status === 200 && response.data.files.length > 0) {
 			response.data.files.forEach((file) => {
-				if (file.status === 'added' || file.status === 'modified') {
-					changed.push(file.filename);
+				if (file.status === "added" || file.status === "modified") {
+					changed.push(file.filename)
 				}
-			});
+			})
 		}
 	}
-
 
 	const options = {
 		name,
@@ -80,17 +77,22 @@ async function main() {
 
 	const lcov = await parse(raw)
 	const baselcov = baseRaw && (await parse(baseRaw))
-	
-	let error = null;
+
+	let error = null
 
 	if (minCoverage > 0) {
-		const coverage = percentage(lcov);
+		const coverage = percentage(lcov)
 		if (coverage < minCoverage) {
-			error = new Error(`Coverage is below the minimum of ${minCoverage}%. Current coverage is ${coverage}%`);
+			error = new Error(
+				`Coverage is below the minimum of ${minCoverage}%. Current coverage is ${coverage}%`,
+			)
 		}
 	}
 
-	const body = await diff(lcov, baselcov, options)
+	let body = await diff(lcov, baselcov, options)
+
+	// Truncate body to max 65536 chars because GitHub API max supports this.
+	body = body.slice(0, 65536)
 
 	const createGitHubComment = () =>
 		githubClient.rest.issues.createComment({
@@ -100,7 +102,7 @@ async function main() {
 			body,
 		})
 
-	const updateGitHubComment = commentId =>
+	const updateGitHubComment = (commentId) =>
 		githubClient.rest.issues.updateComment({
 			repo: context.repo.repo,
 			owner: context.repo.owner,
@@ -115,14 +117,14 @@ async function main() {
 			issue_number: context.payload.pull_request.number,
 		})
 
-		const existingComment = issueComments.data.find(comment =>
+		const existingComment = issueComments.data.find((comment) =>
 			comment.body.includes(commentIdentifier(options.workflowName)),
 		)
 
 		if (existingComment) {
 			await updateGitHubComment(existingComment.id)
 			if (error) {
-				throw error;
+				throw error
 			}
 			return
 		}
@@ -131,11 +133,11 @@ async function main() {
 	await createGitHubComment()
 
 	if (error) {
-		throw error;
+		throw error
 	}
 }
 
-export default main().catch(function(err) {
+export default main().catch(function (err) {
 	console.log(err)
 	core.setFailed(err.message)
 })
