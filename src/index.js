@@ -92,7 +92,7 @@ async function main() {
 	let body = await diff(lcov, baselcov, options)
 
 	// Truncate body to max 65536 chars because GitHub API max supports this.
-	body = body.slice(0, 65536)
+	body = body.slice(0, 65500)
 
 	const createGitHubComment = () =>
 		githubClient.rest.issues.createComment({

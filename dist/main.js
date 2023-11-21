@@ -2302,9 +2302,9 @@ var distNode$7 = {};
 
 var distNode$6 = {};
 
-var isPlainObject$5 = {};
+var isPlainObject$3 = {};
 
-Object.defineProperty(isPlainObject$5, '__esModule', { value: true });
+Object.defineProperty(isPlainObject$3, '__esModule', { value: true });
 
 /*!
  * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
@@ -2313,14 +2313,14 @@ Object.defineProperty(isPlainObject$5, '__esModule', { value: true });
  * Released under the MIT License.
  */
 
-function isObject$1(o) {
+function isObject(o) {
   return Object.prototype.toString.call(o) === '[object Object]';
 }
 
-function isPlainObject$4(o) {
+function isPlainObject$2(o) {
   var ctor,prot;
 
-  if (isObject$1(o) === false) return false;
+  if (isObject(o) === false) return false;
 
   // If has modified constructor
   ctor = o.constructor;
@@ -2328,7 +2328,7 @@ function isPlainObject$4(o) {
 
   // If has modified prototype
   prot = ctor.prototype;
-  if (isObject$1(prot) === false) return false;
+  if (isObject(prot) === false) return false;
 
   // If constructor does not have an Object-specific method
   if (prot.hasOwnProperty('isPrototypeOf') === false) {
@@ -2339,11 +2339,11 @@ function isPlainObject$4(o) {
   return true;
 }
 
-isPlainObject$5.isPlainObject = isPlainObject$4;
+isPlainObject$3.isPlainObject = isPlainObject$2;
 
 Object.defineProperty(distNode$6, '__esModule', { value: true });
 
-var isPlainObject$3 = isPlainObject$5;
+var isPlainObject$1 = isPlainObject$3;
 var universalUserAgent$3 = distNode$8;
 
 function lowercaseKeys(object) {
@@ -2360,7 +2360,7 @@ function lowercaseKeys(object) {
 function mergeDeep(defaults, options) {
   const result = Object.assign({}, defaults);
   Object.keys(options).forEach(key => {
-    if (isPlainObject$3.isPlainObject(options[key])) {
+    if (isPlainObject$1.isPlainObject(options[key])) {
       if (!(key in defaults)) Object.assign(result, {
         [key]: options[key]
       });else result[key] = mergeDeep(defaults[key], options[key]);
@@ -2728,45 +2728,6 @@ const DEFAULTS = {
 const endpoint$1 = withDefaults$2(null, DEFAULTS);
 
 distNode$6.endpoint = endpoint$1;
-
-var isPlainObject$2 = {};
-
-Object.defineProperty(isPlainObject$2, '__esModule', { value: true });
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject$1(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-isPlainObject$2.isPlainObject = isPlainObject$1;
 
 var lib$2 = {exports: {}};
 
@@ -84418,7 +84379,7 @@ function _interopDefault$1 (ex) { return (ex && (typeof ex === 'object') && 'def
 
 var endpoint = distNode$6;
 var universalUserAgent$2 = distNode$8;
-var isPlainObject = isPlainObject$2;
+var isPlainObject = isPlainObject$3;
 var nodeFetch = _interopDefault$1(lib$2.exports);
 var requestError = distNode$5;
 
@@ -86752,14 +86713,14 @@ async function main() {
 
 	const minCoverage = rawMinCoverage ? parseFloat(rawMinCoverage) : 0;
 
-	const raw = await require$$0$1.promises.readFile(lcovFile, "utf-8").catch(err => null);
+	const raw = await require$$0$1.promises.readFile(lcovFile, "utf-8").catch((err) => null);
 	if (!raw) {
 		console.log(`No coverage report found at '${lcovFile}', exiting...`);
 		return
 	}
 
 	const baseRaw =
-		baseFile && (await require$$0$1.promises.readFile(baseFile, "utf-8").catch(err => null));
+		baseFile && (await require$$0$1.promises.readFile(baseFile, "utf-8").catch((err) => null));
 	if (baseFile && !baseRaw) {
 		console.log(`No coverage report found at '${baseFile}', ignoring...`);
 	}
@@ -86773,11 +86734,9 @@ async function main() {
 	const head = context.payload.pull_request.head.ref;
 	const base = context.payload.pull_request.base.ref;
 
-	
 	let changed = [];
 
 	const githubClient = getOctokit_1(token);
-
 
 	if (showChangedFiles) {
 		// Use GitHub's compare two commits API.
@@ -86787,18 +86746,17 @@ async function main() {
 			base,
 			head,
 			owner: context.repo.owner,
-			repo: context.repo.repo
+			repo: context.repo.repo,
 		});
 
 		if (response.status === 200 && response.data.files.length > 0) {
 			response.data.files.forEach((file) => {
-				if (file.status === 'added' || file.status === 'modified') {
+				if (file.status === "added" || file.status === "modified") {
 					changed.push(file.filename);
 				}
 			});
 		}
 	}
-
 
 	const options = {
 		name,
@@ -86814,17 +86772,22 @@ async function main() {
 
 	const lcov = await parse(raw);
 	const baselcov = baseRaw && (await parse(baseRaw));
-	
+
 	let error = null;
 
 	if (minCoverage > 0) {
 		const coverage = percentage$1(lcov);
 		if (coverage < minCoverage) {
-			error = new Error(`Coverage is below the minimum of ${minCoverage}%. Current coverage is ${coverage}%`);
+			error = new Error(
+				`Coverage is below the minimum of ${minCoverage}%. Current coverage is ${coverage}%`,
+			);
 		}
 	}
 
-	const body = await diff(lcov, baselcov, options);
+	let body = await diff(lcov, baselcov, options);
+
+	// Truncate body to max 65536 chars because GitHub API max supports this.
+	body = body.slice(0, 65500);
 
 	const createGitHubComment = () =>
 		githubClient.rest.issues.createComment({
@@ -86834,7 +86797,7 @@ async function main() {
 			body,
 		});
 
-	const updateGitHubComment = commentId =>
+	const updateGitHubComment = (commentId) =>
 		githubClient.rest.issues.updateComment({
 			repo: context.repo.repo,
 			owner: context.repo.owner,
@@ -86849,14 +86812,14 @@ async function main() {
 			issue_number: context.payload.pull_request.number,
 		});
 
-		const existingComment = issueComments.data.find(comment =>
+		const existingComment = issueComments.data.find((comment) =>
 			comment.body.includes(commentIdentifier(options.workflowName)),
 		);
 
 		if (existingComment) {
 			await updateGitHubComment(existingComment.id);
 			if (error) {
-				throw error;
+				throw error
 			}
 			return
 		}
@@ -86865,11 +86828,11 @@ async function main() {
 	await createGitHubComment();
 
 	if (error) {
-		throw error;
+		throw error
 	}
 }
 
-var index = main().catch(function(err) {
+var index = main().catch(function (err) {
 	console.log(err);
 	coreExports.setFailed(err.message);
 });
