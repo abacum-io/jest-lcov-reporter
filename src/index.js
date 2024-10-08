@@ -15,7 +15,6 @@ async function main() {
 	const updateComment = core.getBooleanInput("update-comment")
 	const showChangedFiles = core.getBooleanInput("show-changed-files")
 	const rawMinCoverage = core.getInput("min-coverage")
-	const shouldSkipCoverageCheck = core.getInput('excludeLabels') || []
 
 	const minCoverage = rawMinCoverage ? parseFloat(rawMinCoverage) : 0
 
@@ -36,10 +35,6 @@ async function main() {
 		console.log("Not a pull request, skipping...")
 		return
 	}
-
-	console.log("this is @@@@@@@@@@@@@@@@@@@@@@@@@")
-	console.log(context.payload.pull_request)
-	console.log(shouldSkipCoverageCheck)
 
 	const head = context.payload.pull_request.head.ref
 	const base = context.payload.pull_request.base.ref
